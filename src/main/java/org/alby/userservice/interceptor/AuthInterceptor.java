@@ -7,9 +7,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.alby.userservice.context.UserContext;
 import org.alby.userservice.entity.enums.ErrCodeEnum;
-import org.alby.userservice.service.impl.AuthServiceImpl;
-import org.alby.userservice.util.JwtUtil;
-import org.alby.userservice.util.RedisUtil;
 import org.alby.userservice.util.RespUtil;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -19,53 +16,31 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 
-    private static final String SESSION_KEY_PREFIX = "user:session:";
-    private static final String AUTH_HEADER = "Authorization";
-    private static final String BEARER_PREFIX = "Bearer ";
-
-    @Resource
-    private JwtUtil jwtUtil;
-
-    @Resource
-    private RedisUtil redisUtil;
+    private static final String HEADER_USER_ID = "userId";
+    private static final String HEADER_USERNAME = "userName";
 
     @Resource
     private ObjectMapper objectMapper;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String authHeader = request.getHeader(AUTH_HEADER);
+        String userIdStr = request.getHeader(HEADER_USER_ID);
+        String username = request.getHeader(HEADER_USERNAME);
 
-        if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+        if (userIdStr == null || userIdStr.isBlank()) {
             writeUnauthorized(response);
             return false;
         }
 
-        String token = authHeader.substring(BEARER_PREFIX.length());
-
-        if (!jwtUtil.isTokenValid(token)) {
+        try {
+            Long userId = Long.parseLong(userIdStr);
+            UserContext.set(new UserContext.CurrentUser(userId, username));
+            return true;
+        } catch (NumberFormatException e) {
+            log.warn("Invalid userId header: {}", userIdStr);
             writeUnauthorized(response);
             return false;
         }
-
-        Long userId = jwtUtil.getUserIdFromToken(token);
-        String sessionId = jwtUtil.getSessionIdFromToken(token);
-
-        if (userId == null || sessionId == null) {
-            writeUnauthorized(response);
-            return false;
-        }
-
-        String sessionData = redisUtil.get(SESSION_KEY_PREFIX + sessionId);
-        if (sessionData == null) {
-            writeUnauthorized(response);
-            return false;
-        }
-
-        AuthServiceImpl.SessionData session = objectMapper.readValue(sessionData, AuthServiceImpl.SessionData.class);
-
-        UserContext.set(new UserContext.CurrentUser(session.userId(), session.username()));
-        return true;
     }
 
     @Override

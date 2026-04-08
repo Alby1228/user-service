@@ -32,7 +32,7 @@ spring:
           max-wait: 3000ms
 
 server:
-  port: 8081
+  port: 8089
 
 jwt:
   secret: YWxieS11c2VyLXNlcnZpY2Utand0LXNlY3JldC1rZXktMjAyNi1wbGVhc2UtY2hhbmdlLWluLXByb2R1Y3Rpb24
