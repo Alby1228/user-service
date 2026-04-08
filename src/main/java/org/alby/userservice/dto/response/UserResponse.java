@@ -4,8 +4,6 @@ import lombok.Builder;
 import lombok.Data;
 import org.alby.userservice.entity.User;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 public class UserResponse {
@@ -17,7 +15,7 @@ public class UserResponse {
     private String nickname;
     private String avatar;
     private Integer status;
-    private LocalDateTime createTime;
+    private String createTime;
 
     public static UserResponse fromEntity(User user) {
         return UserResponse.builder()
@@ -28,7 +26,7 @@ public class UserResponse {
                 .nickname(user.getNickname())
                 .avatar(user.getAvatar())
                 .status(user.getStatus())
-                .createTime(user.getCreateTime())
+                .createTime(user.getCreateTime() != null ? user.getCreateTime().toString() : null)
                 .build();
     }
 }
