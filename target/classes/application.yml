@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: user-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/ai-fin?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    username: root
+    password: 12345678
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+          max-wait: 3000ms
+
+server:
+  port: 8081
+
+jwt:
+  secret: YWxieS11c2VyLXNlcnZpY2Utand0LXNlY3JldC1rZXktMjAyNi1wbGVhc2UtY2hhbmdlLWluLXByb2R1Y3Rpb24
+  access-token:
+    expiration: 1800000
+  refresh-token:
+    expiration: 604800000
+
+alby:
+  rpc:
+    default-timeout: 3000
+    default-process-timeout: 3000
+    connect-timeout: 5000
+    core-pool-size: 10
+    max-pool-size: 200
